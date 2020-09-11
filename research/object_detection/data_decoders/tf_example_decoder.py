@@ -180,6 +180,7 @@ class TfExampleDecoder(data_decoder.DataDecoder):
       ValueError: If `expand_labels_hierarchy` is True, but the
         `label_map_proto_file` is not provided.
     """
+    
     # TODO(rathodv): delete unused `use_display_name` argument once we change
     # other decoders to handle label maps similarly.
     del use_display_name
@@ -198,6 +199,10 @@ class TfExampleDecoder(data_decoder.DataDecoder):
             tf.FixedLenFeature((), tf.int64, default_value=1),
         'image/width':
             tf.FixedLenFeature((), tf.int64, default_value=1),
+        'image/channels': 
+            tf.FixedLenFeature((), tf.int64, 1),
+        'image/page':
+            tf.FixedLenFeature((), tf.int64, 1),
         # Image-level labels.
         'image/class/text':
             tf.VarLenFeature(tf.string),
@@ -254,7 +259,9 @@ class TfExampleDecoder(data_decoder.DataDecoder):
           repeated=True)
     self.items_to_handlers = {
         fields.InputDataFields.image:
-            image,
+            slim_example_decoder.ItemHandlerCallback(
+            keys=['image/encoded', 'image/height', 'image/width', 'image/channels', 'image/page'],
+            func=self._read_image),
         fields.InputDataFields.source_id: (
             slim_example_decoder.Tensor('image/source_id')),
         fields.InputDataFields.key: (
@@ -412,7 +419,7 @@ class TfExampleDecoder(data_decoder.DataDecoder):
       else:
         raise ValueError('In order to expand labels, the label_map_proto_file '
                          'has to be provided.')
-
+    
   def decode(self, tf_example_string_tensor):
     """Decodes serialized tensorflow example and returns a tensor dictionary.
 
@@ -566,6 +573,16 @@ class TfExampleDecoder(data_decoder.DataDecoder):
           dtype=tf.int32)
 
     return tensor_dict
+
+  def _read_image(self, keys_to_tensors):
+    image_encoded = keys_to_tensors['image/encoded']
+    height = keys_to_tensors['image/height']
+    width = keys_to_tensors['image/width']
+    channels = keys_to_tensors['image/channels']
+    page = keys_to_tensors['image/page']
+    to_shape = tf.cast(tf.stack([height, width, channels, page]), tf.int32)
+    image = tf.reshape(tf.decode_raw(image_encoded, tf.uint8), to_shape)
+    return image
 
   def _reshape_keypoints(self, keys_to_tensors):
     """Reshape keypoints.

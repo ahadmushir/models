@@ -182,6 +182,8 @@ message FasterRcnn {
 
   // Configs for context model.
   optional Context context_config = 41;
+
+  optional uint32 num_input_channels = 43 [default=3];
 }
 
 message Context {
@@ -230,4 +232,5 @@ message FasterRcnnFeatureExtractor {
 
   // Feature Pyramid Networks config.
   optional FeaturePyramidNetworks fpn = 7;
+
 }
