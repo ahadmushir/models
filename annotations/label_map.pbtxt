@@ -1,4 +1,14 @@
 item {
     id: 1
-    name: 'veggie'
+    name: 'veggie1'
+}
+
+item {
+    id: 2
+    name: 'veggie2'
+}
+
+item {
+    id: 3
+    name: 'veggie3'
 }
