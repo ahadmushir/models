@@ -89,6 +89,7 @@ def main(unused_argv):
                          checkpoint_path=tf.train.latest_checkpoint(
                              FLAGS.checkpoint_dir))
     else:
+      print("finding max eval...")
       model_lib.continuous_eval(estimator, FLAGS.checkpoint_dir, input_fn,
                                 train_steps, name, FLAGS.max_eval_retries)
   else:
@@ -105,4 +106,5 @@ def main(unused_argv):
 
 
 if __name__ == '__main__':
+  print("run!")
   tf.app.run()
